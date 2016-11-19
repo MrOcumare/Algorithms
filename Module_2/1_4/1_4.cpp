@@ -22,10 +22,14 @@ template <typename RandomAccessIterator, typename T>
 void InsertionSort(RandomAccessIterator begin, RandomAccessIterator end, int (*comparator)(const T&, const T&)) {
 	for (RandomAccessIterator iter = begin + 1; iter != end; ++iter) {
 		size_t current_distance = std::distance(begin, iter);
+		auto temp = *iter;
+		size_t j = current_distance;
 		
-		for (size_t j = current_distance; j > 0 && *(begin + j - 1) > *(begin + j); --j) {
-			std::iter_swap(begin + j, begin + j - 1);
+		for (; j > 0 && comparator(temp, *(begin + j - 1)) < 0; --j) {
+			*(begin + j) = *(begin + j - 1);
 		}
+		
+		*(begin + j) = temp;
 	}
 }
 
