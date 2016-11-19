@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iterator>
 #include <set>
 
 typedef std::set<int> T_points;
@@ -42,6 +43,15 @@ int main() {
         points.insert(left_coord);
         points.insert(right_coord);
     }
+    
+//	copy(std::begin(lefts), std::end(lefts), std::ostream_iterator<int>(std::cout, " "));
+//  	std::cout << std::endl;
+//  	
+//	copy(std::begin(rights), std::end(rights), std::ostream_iterator<int>(std::cout, " "));
+//  	std::cout << std::endl;
+//  	
+//	copy(std::begin(points), std::end(points), std::ostream_iterator<int>(std::cout, " "));
+//  	std::cout << std::endl;
     
     std::cout << GetSingleLayerLength(lefts, rights, points) << std::endl;
  
