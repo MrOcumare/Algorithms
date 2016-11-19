@@ -31,3 +31,6 @@
 # Debug files
 *.dSYM/
 *.su
+
+# jetbrains config file for ide
+.idea/
