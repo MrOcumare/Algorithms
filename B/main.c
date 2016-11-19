@@ -17,6 +17,10 @@
 	STACK_##TYPE* STACK_CONSTRUCT_##TYPE() {                                \
 		STACK_##TYPE* self = (STACK_##TYPE*) malloc(sizeof(STACK_##TYPE));  \
 																			\
+		if (self == NULL) {                                                 \
+			return NULL;                                                    \
+		}                                                                   \
+																			\
 		self->base = NULL;                                                  \
 		self->next_item = NULL;                                             \
 		self->base_size = 0;                                                \
@@ -26,27 +30,45 @@
 	}                                                                       \
 \
 	void STACK_DESTRUCT_##TYPE(STACK_##TYPE* self) {    \
-		free(self->base);                               \
+														\
+		if (self->base != NULL) {                       \
+			free(self->base);                           \
+		}                                               \
 														\
 		self->base = NULL;                              \
 		self->next_item = NULL;                         \
 		self->base_size = 0;                            \
 		self->container_size = 0;                       \
 														\
-		free(self);                                     \
+		if (self != NULL) {                             \
+			free(self);                                 \
+		}                                               \
 	}                                                   \
 \
 	void COPY_##TYPE(const TYPE* from, TYPE* to, size_t count) { \
-		const TYPE* f_ptr = from;                         \
-		TYPE* t_ptr = to;                                 \
-														  \
-		for (size_t i = 0; i < count; ++i) {              \
-			*(t_ptr + i) = *(f_ptr + i);                  \
-		}                                                 \
-	}                                                     \
+		if (from ==NULL || to == NULL) {                         \
+			return;                                              \
+		}                                                        \
+																 \
+		const TYPE* f_ptr = from;                                \
+		TYPE* t_ptr = to;                                        \
+														         \
+		for (size_t i = 0; i < count; ++i) {                     \
+			*(t_ptr + i) = *(f_ptr + i);                         \
+		}                                                        \
+	}                                                            \
 \
 	void RESIZE_##TYPE(STACK_##TYPE* self, size_t new_size) {           \
+		if (self == NULL) {                                             \
+			return;                                                     \
+		}                                                               \
+																		\
 		TYPE* new_base = (TYPE*) malloc(sizeof(TYPE) * new_size);       \
+																		\
+		if (new_base == NULL) {                                         \
+			return;                                                     \
+		}                                                               \
+																		\
 		size_t size_to_copy = compare(self->container_size, new_size);  \
 																	    \
 		if (self->base && new_base) {                                   \
@@ -60,6 +82,10 @@
 	}                                                                   \
 \
 	void RESERVE_##TYPE(STACK_##TYPE* self, size_t size) {    \
+		if (self == NULL) {                                   \
+			return;                                           \
+		}                                                     \
+															  \
 		ssize_t diff = self->base_size - size;                \
 															  \
 		if (diff <= 0) {                                      \
@@ -108,6 +134,9 @@
 		return self->container_size == 0;          \
 	}                                              \
 
+#define STACK(TYPE) \
+	STACK_##TYPE
+
 #define CONSTRUCTOR(TYPE) \
 	STACK_CONSTRUCT_##TYPE()
 
@@ -134,7 +163,7 @@
 
 int main() {
 	DECLARE_STACK(char);
-	STACK_char* stack = CONSTRUCTOR(char);
+	STACK(char)* stack = CONSTRUCTOR(char);
 	for (int i = 0; i < 10; ++i) {
 		PUSH(char, stack, 'a');
 	}
