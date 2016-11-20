@@ -161,16 +161,51 @@
 #define EMPTY(TYPE, STACK) \
 	STACK_EMPTY_##TYPE(STACK)
 
+DECLARE_STACK(char)
+
+bool IsValidSymbol(char ch) {
+	char valid_symbols[] =
+			"0123456789"
+			"()[]U^\\";
+
+	for (size_t i = 0; i < sizeof(valid_symbols) - 1; ++i) {
+
+		if (ch == valid_symbols[i]) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool IsOperator(char op) {
+	return op == 'U' || op == '^' || op == '\\';
+}
+
+int Priority(char op) {
+	return op == 'U' || op == '\\' ? 1 : op == '^' ? 2 : -1;
+}
+
+//void ProcessOperation(STACK(char)* stack, char operator) {
+//
+//}
+
+
 int main() {
-	DECLARE_STACK(char);
-	STACK(char)* stack = CONSTRUCTOR(char);
-	for (int i = 0; i < 10; ++i) {
-		PUSH(char, stack, 'a');
+	STACK(char)* expression = CONSTRUCTOR(char);
+	char ch;
+
+	while (true) {
+		ch = fgetc(stdin);
+
+		if (ch == '\n') {
+			break;
+		}
+
+		if (IsValidSymbol(ch)) {
+			PUSH(char, expression, ch);
+		}
 	}
-	for (int i = 0; i < 4; ++i) {
-		POP(char, stack);
-	}
-	PRINT(char, stack, "%c ");
-	DESTRUCTOR(char, stack);
+
 	return 0;
 }
