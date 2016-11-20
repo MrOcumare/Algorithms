@@ -86,7 +86,7 @@
 			return;                                           \
 		}                                                     \
 															  \
-		ssize_t diff = self->base_size - size;                \
+		int diff = self->base_size - size;                \
 															  \
 		if (diff <= 0) {                                      \
 			RESIZE_##TYPE(self, size * MULTIPLIER_COEF);      \
@@ -166,7 +166,7 @@ DECLARE_STACK(char)
 bool IsValidSymbol(char ch) {
 	char valid_symbols[] =
 			"0123456789"
-			"()[]U^\\";
+			",()[]U^\\";
 
 	for (size_t i = 0; i < sizeof(valid_symbols) - 1; ++i) {
 
@@ -186,9 +186,38 @@ int Priority(char op) {
 	return op == 'U' || op == '\\' ? 1 : op == '^' ? 2 : -1;
 }
 
-//void ProcessOperation(STACK(char)* stack, char operator) {
+void GetSet(STACK(char)* base, STACK(char)* buffer) {
+	while (true) {
+		char ch = POP(char, base);
+
+		if (ch == '[') {
+			break;
+		} else if (ch == ',' || ch == ']' || ch == ' ') {
+			continue;
+		}
+
+		PUSH(char, buffer, ch);
+	}
+}
+
+void ProcessOperation(STACK(char)* multiset, char op) {
+	STACK(char)* right = CONSTRUCTOR(char);
+	STACK(char)* left = CONSTRUCTOR(char);
+
+	GetSet(multiset, right);
+	GetSet(multiset, left);
+
+//	STACK(char)* buffer = CONSTRUCTOR(char);
 //
-//}
+//	switch (op) {
+//
+//		case 'U':
+//
+//	}
+
+	DESTRUCTOR(char, right);
+	DESTRUCTOR(char, left);
+}
 
 
 int main() {
@@ -206,6 +235,35 @@ int main() {
 			PUSH(char, expression, ch);
 		}
 	}
+
+	STACK(char)* multiset = CONSTRUCTOR(char);
+	STACK(char)* operators = CONSTRUCTOR(char);
+
+	for (size_t i = 0; i < SIZE(char, expression); ++i) {
+
+		if (expression->base[i] == '(') {
+			PUSH(char, operators, expression->base[i]);
+		} else if (expression->base[i] == ')') {
+
+			while (TOP(char, operators) != '(') {
+				ProcessOperation(multiset, POP(char, operators));
+			}
+
+			POP(char, operators);
+		} else if (IsOperator(expression->base[i])) {
+
+			while (!EMPTY(char, operators)) {
+				ProcessOperation(multiset, POP(char, operators));
+			}
+
+			PUSH(char, operators, expression->base[i]);
+		} else {
+
+		}
+	}
+
+	PRINT(char, expression, "%c");
+	DESTRUCTOR(char, expression);
 
 	return 0;
 }
