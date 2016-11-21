@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #define MULTIPLIER_COEF 2
 #define compare(a, b) a < b ? a : b
@@ -162,11 +163,12 @@
 	STACK_EMPTY_##TYPE(STACK)
 
 DECLARE_STACK(char)
+DECLARE_STACK(int);
 
 bool IsValidSymbol(char ch) {
 	char valid_symbols[] =
 			"0123456789"
-			",()[]U^\\";
+			"-,U()[]^\\";
 
 	for (size_t i = 0; i < sizeof(valid_symbols) - 1; ++i) {
 
@@ -186,37 +188,56 @@ int Priority(char op) {
 	return op == 'U' || op == '\\' ? 1 : op == '^' ? 2 : -1;
 }
 
-void GetSet(STACK(char)* base, STACK(char)* buffer) {
-	while (true) {
-		char ch = POP(char, base);
+void GetSet(STACK(int)* base, STACK(int)* buffer) {
+	int size = POP(int, base);
 
-		if (ch == '[') {
-			break;
-		} else if (ch == ',' || ch == ']' || ch == ' ') {
-			continue;
-		}
-
-		PUSH(char, buffer, ch);
+	for (size_t i = 0; i < size; ++i) {
+		PUSH(int, buffer, POP(int, base));
 	}
 }
 
-void ProcessOperation(STACK(char)* multiset, char op) {
-	STACK(char)* right = CONSTRUCTOR(char);
-	STACK(char)* left = CONSTRUCTOR(char);
+size_t Count(STACK(int)* set, int element) {
+	size_t count = 0;
 
+	for (size_t i = 0; i < SIZE(int, set); ++i) {
+
+		if (set->base[i] == element) {
+			++count;
+		}
+	}
+
+	return count;
+}
+
+void ProcessOperation(STACK(int)* multiset, char op) {
+	STACK(int)* right = CONSTRUCTOR(int);
+//	STACK(int)* left = CONSTRUCTOR(int);
+
+	PRINT(int, multiset, "%d");
 	GetSet(multiset, right);
-	GetSet(multiset, left);
+//	GetSet(multiset, left);
+	POP(int, multiset);
 
-//	STACK(char)* buffer = CONSTRUCTOR(char);
-//
-//	switch (op) {
-//
-//		case 'U':
-//
-//	}
+	size_t size = SIZE(int, right);
 
-	DESTRUCTOR(char, right);
-	DESTRUCTOR(char, left);
+	switch (op) {
+
+		case 'U':
+
+			for (size_t i = 0; i < size; ++i) {
+
+				if (Count(multiset, right->base[i]) == 0) {
+					PUSH(int, multiset, right->base[i]);
+				}
+			}
+
+			PUSH(int, multiset, SIZE(int, multiset));
+
+			break;
+	}
+
+	DESTRUCTOR(int, right);
+//	DESTRUCTOR(int, left);
 }
 
 
@@ -236,8 +257,9 @@ int main() {
 		}
 	}
 
-	STACK(char)* multiset = CONSTRUCTOR(char);
+	STACK(int)* multiset = CONSTRUCTOR(int);
 	STACK(char)* operators = CONSTRUCTOR(char);
+	int chunk_size = 0;
 
 	for (size_t i = 0; i < SIZE(char, expression); ++i) {
 
@@ -257,12 +279,39 @@ int main() {
 			}
 
 			PUSH(char, operators, expression->base[i]);
-		} else {
+		} else if (isdigit(expression->base[i])) {
+			STACK(char)* operand = CONSTRUCTOR(char);
+			++chunk_size;
 
+			while (i < SIZE(char, expression) && isdigit(expression->base[i])) {
+				PUSH(char, operand, expression->base[i++]);
+			}
+
+			PUSH(char, operand, '\0');
+
+			if (isdigit(operand->base[0]) || operand->base[0] == '-') {
+				PUSH(int, multiset, atoi(operand->base));
+			}
+
+			if (expression->base[i] == ']') {
+				PUSH(int, multiset, chunk_size);
+				chunk_size = 0;
+			}
+			PRINT(int, multiset, "%d ");
+			DESTRUCTOR(char, operand);
 		}
 	}
 
+	while (!EMPTY(char, operators)) {
+		ProcessOperation(multiset, POP(char, operators));
+	}
+
 	PRINT(char, expression, "%c");
+	PRINT(int, multiset, "%d");
+	PRINT(char, operators, "%c");
+
+	DESTRUCTOR(char, operators);
+	DESTRUCTOR(int, multiset);
 	DESTRUCTOR(char, expression);
 
 	return 0;
