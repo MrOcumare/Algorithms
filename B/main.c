@@ -196,8 +196,8 @@ void GetSet(STACK(int)* base, STACK(int)* buffer) {
 	}
 }
 
-size_t Count(STACK(int)* set, int element) {
-	size_t count = 0;
+int Count(STACK(int)* set, int element) {
+	int count = 0;
 
 	for (size_t i = 0; i < SIZE(int, set); ++i) {
 
@@ -211,11 +211,7 @@ size_t Count(STACK(int)* set, int element) {
 
 void ProcessOperation(STACK(int)* multiset, char op) {
 	STACK(int)* right = CONSTRUCTOR(int);
-//	STACK(int)* left = CONSTRUCTOR(int);
-
-	PRINT(int, multiset, "%d");
 	GetSet(multiset, right);
-//	GetSet(multiset, left);
 	POP(int, multiset);
 
 	size_t size = SIZE(int, right);
@@ -231,13 +227,12 @@ void ProcessOperation(STACK(int)* multiset, char op) {
 				}
 			}
 
-			PUSH(int, multiset, SIZE(int, multiset));
+			PUSH(int, multiset, (int) SIZE(int, multiset));
 
 			break;
 	}
 
 	DESTRUCTOR(int, right);
-//	DESTRUCTOR(int, left);
 }
 
 
@@ -265,6 +260,7 @@ int main() {
 
 		if (expression->base[i] == '(') {
 			PUSH(char, operators, expression->base[i]);
+
 		} else if (expression->base[i] == ')') {
 
 			while (TOP(char, operators) != '(') {
@@ -272,6 +268,7 @@ int main() {
 			}
 
 			POP(char, operators);
+
 		} else if (IsOperator(expression->base[i])) {
 
 			while (!EMPTY(char, operators)) {
@@ -279,9 +276,9 @@ int main() {
 			}
 
 			PUSH(char, operators, expression->base[i]);
-		} else if (isdigit(expression->base[i])) {
+
+		} else {
 			STACK(char)* operand = CONSTRUCTOR(char);
-			++chunk_size;
 
 			while (i < SIZE(char, expression) && isdigit(expression->base[i])) {
 				PUSH(char, operand, expression->base[i++]);
@@ -291,13 +288,16 @@ int main() {
 
 			if (isdigit(operand->base[0]) || operand->base[0] == '-') {
 				PUSH(int, multiset, atoi(operand->base));
+				++chunk_size;
 			}
 
 			if (expression->base[i] == ']') {
 				PUSH(int, multiset, chunk_size);
 				chunk_size = 0;
 			}
+
 			PRINT(int, multiset, "%d ");
+
 			DESTRUCTOR(char, operand);
 		}
 	}
@@ -306,8 +306,9 @@ int main() {
 		ProcessOperation(multiset, POP(char, operators));
 	}
 
-	PRINT(char, expression, "%c");
-	PRINT(int, multiset, "%d");
+	POP(int, multiset);
+
+	PRINT(int, multiset, "%d ");
 	PRINT(char, operators, "%c");
 
 	DESTRUCTOR(char, operators);
