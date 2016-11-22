@@ -49,16 +49,21 @@ const RandomAccessIterator Partition(const RandomAccessIterator begin, const Ran
 	return i;
 }
 
-//template <typename RandomAccessIterator>
-//void QuickSort(RandomAccessIterator begin, RandomAccessIterator end) {
-//	if (begin >= end) {
-//		return;
-//	}
+template <typename RandomAccessIterator>
+void _QuickSort(RandomAccessIterator begin, RandomAccessIterator end) {
+	if (begin >= end) {
+		return;
+	}
 
-//	auto pivot = Partition(begin, end);
-//	QuickSort(begin, pivot - 1);
-//	QuickSort(pivot + 1, end);
-//}
+	auto pivot = Partition(begin, end);
+	_QuickSort(begin, pivot - 1);
+	_QuickSort(pivot + 1, end);
+}
+
+template <typename RandomAccessIterator>
+void QuickSort(RandomAccessIterator begin, RandomAccessIterator end) {
+	_QuickSort(begin, end - 1);
+}
 
 template <class RandomAccessIterator>
 size_t FindKStatistics(const RandomAccessIterator begin, const RandomAccessIterator end, size_t index) {
@@ -95,7 +100,7 @@ int main() {
 		vec.push_back(item);
 	}
 	
-//	QuickSort(std::begin(vec), std::end(vec) - 1);
+//	QuickSort(std::begin(vec), std::end(vec));
 //	
 //	for (auto iter : vec) {
 //		std::cout << iter << ' ';
