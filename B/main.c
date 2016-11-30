@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <string.h>
 #include <ctype.h>
 
 #define INVALID_INPUT 0
@@ -137,6 +136,9 @@
 		return self->container_size == 0;          \
 	}                                              \
 
+DECLARE_STACK(char);
+DECLARE_STACK(int);
+
 #define STACK(TYPE) \
 	STACK_##TYPE
 
@@ -170,9 +172,6 @@ int comparator(const void* a, const void* b) {
 
 #define SORT(TYPE, SET) \
 	qsort(SET->base, SIZE(TYPE, SET), sizeof(TYPE), comparator);
-
-DECLARE_STACK(char)
-DECLARE_STACK(int);
 
 bool IsValidSymbol(char ch) {
 	char valid_symbols[] =
@@ -287,10 +286,13 @@ void ProcessOperation(STACK(int)* multiset, char op) {
 
 			PUSH(int, multiset, (int) SIZE(int, buffer));
 
-			DESTRUCTOR(int, buffer);
+			break;
+
+		default:
 			break;
 	}
 
+	DESTRUCTOR(int, buffer);
 	DESTRUCTOR(int, left);
 	DESTRUCTOR(int, right);
 }
@@ -317,8 +319,6 @@ int main() {
 
 		PUSH(char, expression, ch);
 	}
-
-	fprintf(stdout, "\n");
 
 	STACK(int)* multiset = CONSTRUCTOR(int);
 	STACK(char)* operators = CONSTRUCTOR(char);
@@ -380,17 +380,27 @@ int main() {
 	POP(int, multiset);
 	SORT(int, multiset);
 
-	fprintf(stdout, "[");
+	STACK(int)* answer = CONSTRUCTOR(int);
+
 	for (size_t i = 0; i < SIZE(int, multiset); ++i) {
 
-		if (i == SIZE(int, multiset) - 1) {
-			fprintf(stdout, "%d", multiset->base[i]);
+		if (!IsIn(multiset->base[i], answer)) {
+			PUSH(int, answer, multiset->base[i]);
+		}
+	}
+
+	fprintf(stdout, "[");
+	for (size_t i = 0; i < SIZE(int, answer); ++i) {
+
+		if (i == SIZE(int, answer) - 1) {
+			fprintf(stdout, "%d", answer->base[i]);
 		} else {
-			fprintf(stdout, "%d,", multiset->base[i]);
+			fprintf(stdout, "%d,", answer->base[i]);
 		}
 	}
 	fprintf(stdout, "]\n");
 
+	DESTRUCTOR(int, answer);
 	DESTRUCTOR(char, operators);
 	DESTRUCTOR(int, multiset);
 	DESTRUCTOR(char, expression);
