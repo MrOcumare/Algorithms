@@ -3,10 +3,19 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+/* Program written for Technopark Deep C/C++ course */
+/* Copyright Andrey Kamakin APO-11 2016 */
+
 #define INVALID_INPUT 0
 
+// Multiplication coefficient for stack growth
 #define MULTIPLIER_COEF 2
 #define compare(a, b) a < b ? a : b
+
+/*
+ * Here is an example of C generic programming.
+ * Especially in this section is presented 'template' stack.
+ */
 
 #define DECLARE_STACK(TYPE)         \
     typedef struct {                \
@@ -90,7 +99,7 @@
             return;                                           \
         }                                                     \
                                                               \
-        int diff = self->base_size - size;                \
+        int diff = self->base_size - size;                    \
                                                               \
         if (diff <= 0) {                                      \
             RESIZE_##TYPE(self, size * MULTIPLIER_COEF);      \
@@ -138,10 +147,17 @@
         return self->container_size == 0;          \
     }                                              \
 
+/*
+ * Declare macroses to be able to use stack
+ */
 
 DECLARE_STACK(char);
 
 DECLARE_STACK(int);
+
+/*
+ * Define methods for more comfortable usage.
+ */
 
 #define STACK(TYPE) \
     STACK_##TYPE
@@ -177,6 +193,10 @@ int comparator(const void* a, const void* b) {
 #define SORT(TYPE, SET) \
     qsort(SET->base, SIZE(TYPE, SET), sizeof(TYPE), comparator);
 
+/*
+ * Checks if all entered symbols are valid in this program.
+ */
+
 bool IsValidSymbol(char ch) {
 	char valid_symbols[] =
 		"0123456789"
@@ -192,13 +212,26 @@ bool IsValidSymbol(char ch) {
 	return false;
 }
 
+/*
+ * Checks if symbol is operator.
+ */
+
 bool IsOperator(char op) {
 	return op == 'U' || op == '^' || op == '\\';
 }
 
+/*
+ * Returns the priority of operator.
+ * -1 if is not valid operator.
+ */
+
 int Priority(char op) {
 	return op == 'U' || op == '\\' ? 1 : op == '^' ? 2 : -1;
 }
+
+/*
+ * Highlights a single set from multiset.
+ */
 
 void GetSet(STACK(int)* base, STACK(int)* buffer) {
 	int size = POP(int, base);
@@ -208,6 +241,10 @@ void GetSet(STACK(int)* base, STACK(int)* buffer) {
 			int, base));
 	}
 }
+
+/*
+ * Counts the amount of equal elements in a set.
+ */
 
 int Count(STACK(int)* set, int element) {
 	int count = 0;
@@ -222,6 +259,10 @@ int Count(STACK(int)* set, int element) {
 	return count;
 }
 
+/*
+ * Checks if element is already in another set.
+ */
+
 bool IsIn(int element, STACK(int)* set) {
 	for (size_t i = 0; i < SIZE(int, set); ++i) {
 
@@ -232,6 +273,14 @@ bool IsIn(int element, STACK(int)* set) {
 
 	return false;
 }
+
+/*
+ * Performs main operations with sets.
+ * It highlights 2 sets from a single multiset.
+ * U - unification
+ * ^ - intersection
+ * \ - difference
+ */
 
 void ProcessOperation(STACK(int)* multiset, char op) {
 	STACK(int)* right = CONSTRUCTOR(int);
