@@ -34,3 +34,4 @@
 
 # jetbrains config file for ide
 .idea/
+cmake-build-debug/
