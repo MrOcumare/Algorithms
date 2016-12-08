@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 #define INVALID_INPUT    0
-#define INVALID_ARGUMENT 0
 #define BYE_BYE          0
 #define BAD_ALLOC        0
 #define NULL_PTR         0
@@ -15,16 +13,7 @@ void Swap(int* a, int* b) {
 }
 
 void QuickSort(int* array, int size) {
-	if (array == NULL) {
-		fprintf(stderr, "[error]\n");
-
-		return;
-	}
-
-	if (size < 0) {
-		fprintf(stderr, "[error]\n");
-		free(array);
-
+	if (array == NULL || size < 0) {
 		return;
 	}
 
@@ -57,25 +46,13 @@ void QuickSort(int* array, int size) {
 }
 
 int* SeekMax(int* array, int size, int number_of_max_elements){
-	if (array == NULL) {
-		fprintf(stderr, "[error]\n");
-
+	if (array == NULL || size < number_of_max_elements || size < 0) {
 		return NULL_PTR;
-	}
-
-	if (size < number_of_max_elements || size < 0) {
-		fprintf(stderr, "[error]\n");
-		free(array);
-
-		return INVALID_ARGUMENT;
 	}
 
 	int* max = (int*) malloc(sizeof(int) * number_of_max_elements);
 
 	if (max == NULL){
-		fprintf(stdout, "[error]\n");
-		free(array);
-
 		return BAD_ALLOC;
 	}
 
@@ -87,16 +64,7 @@ int* SeekMax(int* array, int size, int number_of_max_elements){
 }
 
 void PrintArray(int* array, int size) {
-	if (array == NULL) {
-		fprintf(stderr, "[error]\n");
-
-		return;
-	}
-
-	if (size < 0) {
-		fprintf(stderr, "[error]\n");
-		free(array);
-
+	if (array == NULL || size < 0) {
 		return;
 	}
 
@@ -116,7 +84,7 @@ int main() {
 	int number_of_elements = 0;
 
 	if (fscanf(stdin, "%d", &number_of_elements) != 1 || number_of_elements < 0) {
-		fprintf(stderr, "[error]\n");
+		fprintf(stdout, "[error]");
 
 		return INVALID_INPUT;
 	}
@@ -124,15 +92,15 @@ int main() {
 	int* array = (int*) malloc((sizeof(int)) * number_of_elements);
 
 	if (array == NULL){
-		fprintf(stderr, "[error]\n");
+		fprintf(stdout, "[error]");
 
 		return BAD_ALLOC;
 	}
 
 	for (int i = 0; i < number_of_elements; ++i) {
 
-		if (!fscanf(stdin, "%d", &array[i])) {  // если написать if (fscanf(...) != 1 , то не проходит 9 тест
-			fprintf(stderr, "[error]\n");
+		if (feof(stdin) || fscanf(stdin, "%d", &array[i]) != 1) {
+			fprintf(stdout, "[error]");
 			free(array);
 
 			return INVALID_INPUT;
@@ -142,7 +110,7 @@ int main() {
 	int number_of_max = 0;
 
 	if (fscanf(stdin, "%d", &number_of_max) != 1 || number_of_max < 0 || number_of_max > number_of_elements) {
-		fprintf(stdout, "[error]\n");
+		fprintf(stdout, "[error]");
 		free(array);
 
 		return INVALID_INPUT;
@@ -152,7 +120,7 @@ int main() {
 	int* max = SeekMax(array, number_of_elements, number_of_max);
 
 	if (max == NULL) {
-		fprintf(stderr, "[error]\n");
+		fprintf(stdout, "[error]");
 		free(array);
 
 		return NULL_PTR;
