@@ -35,3 +35,7 @@
 # jetbrains config file for ide
 .idea/
 cmake-build-debug/
+
+# lection ignore dirs
+AlgorithmsLections/
+CPPLections/
