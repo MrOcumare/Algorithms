@@ -4,6 +4,7 @@ template <class T>
 struct Node {
 	T key{}; // Data contained in Node
 	size_t level{1}; // Level on which Node is located
+	size_t nodes_count{1}; // Amount of nodes under this
 
 	Node* left{}; // Pointer to left child
 	Node* right{}; // Pointer to right child
@@ -11,7 +12,7 @@ struct Node {
 	// Constructors
 	Node() = delete;
 	Node(T key) :
-		key{key}, left{nullptr}, right{nullptr} {}
+		key{key} {}
 };
 
 template <class T>
@@ -41,9 +42,11 @@ class AVLBinaryTree {
 		// Removes Node with specified key from tree
 		Node<T>* find_min(Node<T>*);
 		Node<T>* remove(Node<T>*, const T&);
-		// Returns the amount of nodes in a tree
-		const size_t count_nodes(const Node<T>*) const;
-		// Finds Node with a specific key in a tree
+		// Returns the amount of child nodes connected with node
+		const size_t get_nodes_count(Node<T>*) const;
+		void fix_nodes_count(Node<T>*);
+
+			// Finds Node with a specific key in a tree
 		const T search(Node<T>*, const size_t&) const;
 
 		// Helpful methods for balancing
@@ -98,13 +101,27 @@ void AVLBinaryTree<T>::fix_height(Node<T>* node) {
 }
 
 template <class T>
+const size_t AVLBinaryTree<T>::get_nodes_count(Node<T>* node) const {
+	return node ? node->nodes_count : 0;
+}
+
+template <class T>
+void AVLBinaryTree<T>::fix_nodes_count(Node<T>* node) {
+	size_t left_tree_nodes_count{get_nodes_count(node->left)};
+	size_t right_tree_nodes_count{get_nodes_count(node->right)};
+	node->nodes_count = left_tree_nodes_count + 1 + right_tree_nodes_count;
+}
+
+template <class T>
 Node<T>* AVLBinaryTree<T>::rotate_right(Node<T>* node) {
 	Node<T>* left(node->left);
 	node->left = left->right;
 	left->right = node;
 
 	fix_height(node);
+	fix_nodes_count(node);
 	fix_height(left);
+	fix_nodes_count(left);
 
 	return left;
 }
@@ -116,7 +133,9 @@ Node<T>* AVLBinaryTree<T>::rotate_left(Node<T>* node) {
 	right->left = node;
 
 	fix_height(node);
+	fix_nodes_count(node);
 	fix_height(right);
+	fix_nodes_count(right);
 
 	return right;
 }
@@ -124,6 +143,7 @@ Node<T>* AVLBinaryTree<T>::rotate_left(Node<T>* node) {
 template <class T>
 Node<T>* AVLBinaryTree<T>::balance(Node<T>* node) {
 	fix_height(node);
+	fix_nodes_count(node);
 
 	if (bfactor(node) == 2) {
 
@@ -215,30 +235,21 @@ void AVLBinaryTree<T>::remove(const T& value) {
 //----------------------------------------------------------------------------------------------------------------------
 
 template <class T>
-const size_t AVLBinaryTree<T>::count_nodes(const Node<T>* root) const {
-	if (root == nullptr) {
-		return 0;
-	}
-
-	return count_nodes(root->left) + 1 + (count_nodes(root->right));
-}
-
-template <class T>
 const T AVLBinaryTree<T>::search(Node<T>* root, const size_t& k_statistics) const {
 	T result{};
 
-	if (k_statistics < count_nodes(root)) {
+	if (k_statistics < get_nodes_count(root)) {
 		Node<T>* p_crawl = root;
-		size_t element_index = count_nodes(root->left);
+		size_t element_index = get_nodes_count(root->left);
 
 		while (element_index != k_statistics) {
 
 			if (k_statistics > element_index) {
 				p_crawl = p_crawl->right;
-				element_index = element_index + 1 + count_nodes(p_crawl->left);
+				element_index = element_index + 1 + get_nodes_count(p_crawl->left);
 			} else {
 				p_crawl = p_crawl->left;
-				element_index = element_index - 1 - count_nodes(p_crawl->right);
+				element_index = element_index - 1 - get_nodes_count(p_crawl->right);
 			}
 		}
 
@@ -254,7 +265,6 @@ const T AVLBinaryTree<T>::search(const size_t& k_statistics) const {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-
 int main() {
 	size_t command_count{};
 	std::cin >> command_count;
