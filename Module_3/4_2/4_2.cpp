@@ -9,7 +9,7 @@ struct Node {
 	Node* right{}; // Pointer to right child
 
 	// Constructors
-	Node() = default;
+	Node() = delete;
 	Node(T key) :
 		key{key}, left{nullptr}, right{nullptr} {}
 };
@@ -40,7 +40,6 @@ class AVLBinaryTree {
 		Node<T>* insert(Node<T>*, const T&);
 		// Removes Node with specified key from tree
 		Node<T>* find_min(Node<T>*);
-		Node<T>* remove_min(Node<T>*);
 		Node<T>* remove(Node<T>*, const T&);
 		// Returns the amount of nodes in a tree
 		const size_t count_nodes(const Node<T>*) const;
@@ -69,6 +68,7 @@ void AVLBinaryTree<T>::clear_tree(Node<T>* tree) {
 	if (tree != nullptr) {
 		clear_tree(tree->left);
 		clear_tree(tree->right);
+
 		delete tree;
 	}
 }
@@ -172,16 +172,6 @@ Node<T>* AVLBinaryTree<T>::find_min(Node<T>* node) {
 }
 
 template <class T>
-Node<T>* AVLBinaryTree<T>::remove_min(Node<T>* node) {
-	if (node->left == nullptr) {
-		return node->right;
-	}
-
-	node->left = remove_min(node->left);
-	return balance(node);
-}
-
-template <class T>
 Node<T>* AVLBinaryTree<T>::remove(Node<T>* root, const T& value) {
 	if (root == nullptr) {
 		return nullptr;
@@ -192,20 +182,27 @@ Node<T>* AVLBinaryTree<T>::remove(Node<T>* root, const T& value) {
 	} else if (value > root->key) {
 		root->right = remove(root->right, value);
 	} else {
-		Node<T>* left(root->left);
-		Node<T>* right(root->right);
 
-		delete root;
+		if (root->left == nullptr || root->right == nullptr) {
+			Node<T>* temp = root->left ? root->left : root->right;
 
-		if (!right) {
-			return left;
+			if (temp == nullptr) {
+				temp = root;
+				root = nullptr;
+			} else {
+				*root = *temp;
+			}
+
+			delete temp;
+		} else {
+			Node<T>* temp = find_min(root->right);
+			root->key = temp->key;
+			root->right = remove(root->right, temp->key);
 		}
+	}
 
-		Node<T>* min = find_min(right);
-		min->right = remove_min(right);
-		min->left = left;
-
-		return balance(min);
+	if (root == nullptr) {
+		return root;
 	}
 
 	return balance(root);
