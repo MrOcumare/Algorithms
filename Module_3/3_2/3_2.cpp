@@ -11,9 +11,7 @@ struct Node {
 	Node* right{};
 
 	Node() = delete;
-	explicit Node(T _key)
-		: key{_key} {}
-	explicit Node(T _key, int _priority)
+	explicit Node(T _key, int _priority = 0)
 		: key{_key}, priority{_priority} {}
 	~Node() {
 		delete left;
@@ -30,7 +28,7 @@ class Tree {
 		explicit Tree() = default;
 		~Tree() { delete root; }
 
-		void add(const T&, const int&);
+		void add(const T&, const int& priority = 0);
 		const size_t get_max_layer_width();
 
 	protected:
@@ -63,7 +61,9 @@ const size_t Tree<T>::get_max_layer_width() {
 
 			if (current_node->left != nullptr) {
 				layer.push(current_node->left);
-			} else if (current_node->right != nullptr) {
+			}
+
+			if (current_node->right != nullptr) {
 				layer.push(current_node->right);
 			}
 
@@ -116,12 +116,12 @@ void NaiveTree<T>::insert(const T& value, const int& priority) {
 
 template <class T>
 class Treap : public Tree<T> {
-		void split(Node<T>*, int, Node<T>*&, Node<T>*&);
+		void split(Node<T>*, const int&, Node<T>*&, Node<T>*&);
 		void insert(const T&, const int&) override;
 };
 
 template <class T>
-void Treap<T>::split(Node<T>* node, int key, Node<T>*& left, Node<T>*& right) {
+void Treap<T>::split(Node<T>* node, const int& key, Node<T>*& left, Node<T>*& right) {
 	if (node == nullptr) {
 		left = nullptr;
 		right = nullptr;
@@ -181,7 +181,7 @@ int main(const int argc, const char* argv[]) {
 		std::cin >> key >> priority;
 
 		treap.add(key, priority);
-		naive_tree.add(key, 0);
+		naive_tree.add(key);
 	}
 
 	std::cout << treap.get_max_layer_width() - naive_tree.get_max_layer_width() << std::endl;
