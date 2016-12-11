@@ -29,7 +29,7 @@ class Tree {
 		~Tree() { delete root; }
 
 		void add(const T&, const int& priority = 0);
-		const size_t get_max_layer_width();
+		const int get_max_layer_width() const;
 
 	protected:
 		virtual void insert(const T&, const int&) = 0;
@@ -41,16 +41,16 @@ void Tree<T>::add(const T& key, const int& priority) {
 }
 
 template <class T>
-const size_t Tree<T>::get_max_layer_width() {
-	size_t max_width{};
-	size_t current_width{};
+const int Tree<T>::get_max_layer_width() const {
+	int max_width{};
+	int current_width{};
 
 	std::queue<Node<T>*> layer;
 	Node<T>* current_node{};
 	layer.push(root);
 
 	while (!layer.empty()) {
-		current_width = layer.size();
+		current_width = static_cast<int>(layer.size());
 
 		if (current_width > max_width) {
 			max_width = current_width;
@@ -184,7 +184,7 @@ int main(const int argc, const char* argv[]) {
 		naive_tree.add(key);
 	}
 
-	std::cout << treap.get_max_layer_width() - naive_tree.get_max_layer_width() << std::endl;
+	std::cout << (treap.get_max_layer_width() - naive_tree.get_max_layer_width());
 
 	return 0;
 }
